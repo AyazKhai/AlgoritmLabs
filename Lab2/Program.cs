@@ -1,132 +1,101 @@
 ﻿using Lab2;
 using System.Diagnostics;
 
-class ShakerSort
+class Program
 {
-    // Метод для выполнения шейкерной сортировки
-    static void ShakerSortAlgorithm(int[] array, out long comparisons, out long swaps)
-    {
-        comparisons = 0;
-        swaps = 0;
-        bool swapped;
-        do
-        {
-            swapped = false;
-            for (int i = array.Length - 1; i > 0; i--)
-            {
-                comparisons++; // увеличиваем счетчик сравнений
-                if (array[i] < array[i - 1])
-                {
-                    int temp = array[i];
-                    array[i] = array[i - 1];
-                    array[i - 1] = temp;
-                    swapped = true;
-                    swaps++; // увеличиваем счетчик обменов
-                }
-            }
-
-            if (!swapped)
-                break;
-
-            swapped = false;
-            for (int i = 1; i < array.Length; i++)
-            {
-                comparisons++; // увеличиваем счетчик сравнений
-                if (array[i] < array[i - 1])
-                {
-                    int temp = array[i];
-                    array[i] = array[i - 1];
-                    array[i - 1] = temp;
-                    swapped = true;
-                    swaps++; // увеличиваем счетчик обменов
-                }
-            }
-        } while (swapped);
-    }
-
-    // Метод для вывода массива на экран
-    static void PrintArray(int[] array)
-    {
-        foreach (var element in array)
-        {
-            Console.Write(element + " ");
-        }
-        Console.WriteLine();
-    }
-
     static void Main()
     {
-        int length = 24; // Примерная длина массива
+        int length = 32; //длина массива
         int minValue = 0; // Минимальное значение элементов
         int maxValue = 100; // Максимальное значение элементов
         double k = 25; // Процент повторений в массиве с повторениями
-        int subarrayLength = 12; // Длина подмассивов в массиве из отсортированных подмассивов
+        int subarrayLength = 12; // Длина подмассивов в массиве из отсортированных подмассивов должна быть меньше половины длины
         double m = 5; // Процент случайных элементов в частично отсортированном массиве
         long comparisons, swaps;
+        int[] originalArray = ArrayGenerator.GenerateRandomArray(length, minValue, maxValue);
 
-        ///////////////////////////////////////////
-        Console.WriteLine("     Массив случайных чисел:");
-        Stopwatch stopwatch1 = Stopwatch.StartNew();
-        // Выполняем сортировку и получаем число сравнений и обменов
-        int[] randomArray = ArrayGenerator.GenerateRandomArray(length, minValue, maxValue);
-        ShakerSortAlgorithm(randomArray, out comparisons, out swaps);
-        stopwatch1.Stop();
-
-        Console.WriteLine($"Время выполнения: {stopwatch1.ElapsedTicks} тиков, Число сравнений: {comparisons}, Число обменов: {swaps}");
-        Console.WriteLine("Отсортированный массив:");
-        PrintArray(randomArray);
-        //////////////////////////////////////////
+        // Создание копий массива с таким же размером и содержимым
+        int[] arrayWithRep = ArrayGenerator.ModifyArrayWithRepeats((int[])originalArray.Clone(), minValue, maxValue, k);
+        int[] arrayWirhSortSub = ArrayGenerator.ModifyArrayWithSortedSubarrays((int[])originalArray.Clone(), subarrayLength);
+        int[] arrayPartRandSort = ArrayGenerator.ModifyArrayWithPartiallyRandomSorted((int[])originalArray.Clone(), minValue, maxValue, m);
 
 
-        ///////////////////////////////////////////
-        Console.WriteLine("     Массив случайных чисел с большим количеством повторений одного элемента (K%):");
-        Stopwatch stopwatch2 = Stopwatch.StartNew();
-        // Выполняем сортировку и получаем число сравнений и обменов
-        int[] arrayWithRepeats = ArrayGenerator.GenerateArrayWithRepeats(length, minValue, maxValue, k);
-        ShakerSortAlgorithm(arrayWithRepeats, out comparisons, out swaps);
 
-        stopwatch2.Stop();
-        Console.WriteLine($"Время выполнения: {stopwatch2.ElapsedTicks} тиков, Число сравнений: {comparisons}, Число обменов: {swaps}");
-        Console.WriteLine("Отсортированный массив:");
-        PrintArray(arrayWithRepeats);
-        //////////////////////////////////////////
+        (string title, int[] arr)[] scenarios = {
+            ("Массив случайных чисел",originalArray),
+            ("Массив случайных чисел с повторениями K%", arrayWithRep),
+            ("Массив из отсортированных L подмассивов",arrayWirhSortSub),
+            ("Отсортированный массив с случайными элементами M%", arrayPartRandSort),
+        };
 
-        ///////////////////////////////////////////
-        Console.WriteLine("     Массив из L отсортированных подмассивов");
-        Stopwatch stopwatch3 = Stopwatch.StartNew();
-        // Выполняем сортировку и получаем число сравнений и обменов
-        int[] sortedSubarraysArray = ArrayGenerator.GenerateSortedSubarraysArray(length, subarrayLength);
-        ShakerSortAlgorithm(sortedSubarraysArray, out comparisons, out swaps);
+        Console.WriteLine("Шейкерная сортировка");
+        foreach (var (title, arr) in scenarios)
+        {
+            Console.WriteLine($"     {title}");
+            int[] array = (int[])arr.Clone();
+            Console.Write("Массив до сортировки: ");
+            ArrayGenerator.PrintArray(array);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            Sorts.ShakerSortAlgorithm(array, out comparisons, out swaps);
+            stopwatch.Stop();
+            Console.WriteLine($"Время выполнения: {stopwatch.ElapsedTicks} тиков, Число сравнений: {comparisons}, Число обменов: {swaps}");
+            Console.Write("Отсортированный массив: ");
+            ArrayGenerator.PrintArray(array);
+            Console.WriteLine();
+        }
 
-        stopwatch3.Stop();
-        Console.WriteLine($"Время выполнения: {stopwatch3.ElapsedTicks} тиков, Число сравнений: {comparisons}, Число обменов: {swaps}");
-        Console.WriteLine("Отсортированный массив:");
-        PrintArray(sortedSubarraysArray);
-        //////////////////////////////////////////
-
-        ///////////////////////////////////////////
-        Console.WriteLine("     Отсортированный массив, в котором M% чисел заменены на случайные.");
-        Stopwatch stopwatch4 = Stopwatch.StartNew();
-        // Выполняем сортировку и получаем число сравнений и обменов
-        int[] partiallyRandomSortedArray = ArrayGenerator.GeneratePartiallyRandomSortedArray(length, minValue, maxValue, m);
-        ShakerSortAlgorithm(partiallyRandomSortedArray, out comparisons, out swaps);
-
-        stopwatch4.Stop();
-        Console.WriteLine($"Время выполнения: {stopwatch4.ElapsedTicks} тиков, Число сравнений: {comparisons}, Число обменов: {swaps}");
-        Console.WriteLine("Отсортированный массив:");
-        PrintArray(partiallyRandomSortedArray);
-        //////////////////////////////////////////
-
-        Console.WriteLine("\nЧастично отсортированный массив:");
-        
-
-        //Console.WriteLine("Исходный массив:");
-        //PrintArray(partiallyRandomSortedArray);
-
-        //// Выполняем шейкерную сортировку
-        //ShakerSortAlgorithm(array);
-
-        //Console.WriteLine("Отсортированный массив:");
-        //PrintArray(array);
+        Console.WriteLine("Битонная сортировка");
+        foreach (var (title, arr) in scenarios)
+        {
+            Console.WriteLine($"     {title}");
+            int[] array = (int[])arr.Clone();
+            Console.Write("Массив до сортировки: ");
+            ArrayGenerator.PrintArray(array);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            Sorts.BitonicSort(array, array.Length, true, out comparisons, out swaps);
+            stopwatch.Stop();
+            Console.WriteLine($"Время выполнения: {stopwatch.ElapsedTicks} тиков, Число сравнений: {comparisons}, Число обменов: {swaps}");
+            Console.Write("Отсортированный массив: ");
+            ArrayGenerator.PrintArray(array);
+            Console.WriteLine();
+        }
+        Console.WriteLine("Пирамидальная сортировка");
+        foreach (var (title, arr) in scenarios)
+        {
+            Console.WriteLine($"     {title}");
+            int[] array = (int[])arr.Clone();
+            Console.Write("Массив до сортировки: ");
+            ArrayGenerator.PrintArray(array);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            Sorts.HeapSortAlgorithm(array, out comparisons, out swaps);
+            stopwatch.Stop();
+            Console.WriteLine($"Время выполнения: {stopwatch.ElapsedTicks} тиков, Число сравнений: {comparisons}, Число обменов: {swaps}");
+            Console.Write("Отсортированный массив: ");
+            ArrayGenerator.PrintArray(array);
+            Console.WriteLine();
+        }
+        /*
+        (string title, Func<int[]> generator)[] scenarios = {
+            ("Массив случайных чисел", () => ArrayGenerator.GenerateRandomArray(length, minValue, maxValue)),
+            ("Массив случайных чисел с повторениями K%", () => ArrayGenerator.GenerateArrayWithRepeats(length, minValue, maxValue, k)),
+            ("Массив из отсортированных L подмассивов", () => ArrayGenerator.GenerateSortedSubarraysArray(length, subarrayLength)),
+            ("Отсортированный массив с случайными элементами M%", () => ArrayGenerator.GeneratePartiallyRandomSortedArray(length, minValue, maxValue, m)),
+        };
+        Console.WriteLine("Шейкерная сортировка");
+        foreach (var (title, generator) in scenarios)
+        {
+            Console.WriteLine($"     {title}");
+            int[] array = generator();
+            Console.Write("Массив до сортировки: ");
+            ArrayGenerator.PrintArray(array);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            Sorts.ShakerSortAlgorithm(array, out comparisons, out swaps);
+            stopwatch.Stop();
+            Console.WriteLine($"Время выполнения: {stopwatch.ElapsedTicks} тиков, Число сравнений: {comparisons}, Число обменов: {swaps}");
+            Console.Write("Отсортированный массив: ");
+            ArrayGenerator.PrintArray(array);
+            Console.WriteLine();
+        }
+        */
     }
 }
