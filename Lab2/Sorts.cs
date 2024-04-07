@@ -63,7 +63,7 @@ namespace Lab2
         /// <param name="comparisons">счетчик сравнения</param>
         /// <param name="swaps">счетчик перемещений</param>
         /// <exception cref="ArgumentException"></exception>
-        public static void BitonicSort(int[] arr, int cnt, bool order, out long comparisons, out long swaps)
+        public static void BitonicSort(int[] arr, int cnt, bool order, out long comparisons, out long swaps)  
         {
             comparisons = 0;
             swaps = 0;

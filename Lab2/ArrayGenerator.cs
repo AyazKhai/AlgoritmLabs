@@ -25,11 +25,14 @@ namespace Lab2
         // Метод для вывода массива на экран
         public static void PrintArray(int[] array)
         {
+            int counter = 0;
             foreach (var element in array)
             {
-                Console.Write(element + " ");
+                Console.Write(element + ", ");
+                counter++;
             }
             Console.WriteLine();
+            Console.WriteLine(counter);
         }
 
 
